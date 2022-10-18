@@ -1,0 +1,33 @@
+[
+  {
+    "arguments": [
+      "/sbin/clang",
+      "-I./include",
+      "-Wall",
+      "-Wextra",
+      "-pedantic",
+      "-O3",
+      "-g",
+      "-c",
+      "-o",
+      "build/./src/glad.c.o",
+      "src/glad.c"
+    ],
+    "directory": "/home/jawad/Desktop/opengl-template",
+    "file": "/home/jawad/Desktop/opengl-template/src/glad.c",
+    "output": "/home/jawad/Desktop/opengl-template/build/src/glad.c.o"
+  },
+  {
+    "arguments": [
+      "/sbin/clang++",
+      "-I./include",
+      "-c",
+      "-o",
+      "build/./src/main.cpp.o",
+      "src/main.cpp"
+    ],
+    "directory": "/home/jawad/Desktop/opengl-template",
+    "file": "/home/jawad/Desktop/opengl-template/src/main.cpp",
+    "output": "/home/jawad/Desktop/opengl-template/build/src/main.cpp.o"
+  }
+]
