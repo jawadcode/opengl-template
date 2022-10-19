@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <cmath>
 
 // A callback to change the size of the viewport when the framebuffer size is
 // changed
@@ -33,17 +34,30 @@ unsigned int get_shader_program();
 int main() {
     GLFWwindow *window = init_window();
 
+    GLint num_attr;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &num_attr);
+    std::cout << "Maximum number of vertex attributes: " << num_attr
+              << std::endl;
+
     GLuint shader_program_id = get_shader_program();
 
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f,
+        0.5f,  0.5f,  0.0f, // top right
+        0.5f,  -0.5f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f, 0.5f,  0.0f  // top left
     };
-
+    unsigned int indices[] = {
+        // note that we start from 0!
+        0, 1, 3, // first Triangle
+        1, 2, 3  // second Triangle
+    };
     // Unique IDs corresponding to our Vertex Attribute Object and Vertex Buffer
     // Object respectively
-    GLuint vao_id, vbo_id;
+    GLuint vao_id, vbo_id, ebo_id;
     glGenVertexArrays(1, &vao_id);
     glGenBuffers(1, &vbo_id);
+    glGenBuffers(1, &ebo_id);
     /* Bind the VAO first, then bind and set vertex buffer(s), and then
        configure vertex attribute(s) */
     glBindVertexArray(vao_id);
@@ -51,9 +65,12 @@ int main() {
     // From now on, any calls we make to the GL_ARRAY_BUFFER target will use
     // this buffer specifically
     glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_id);
     // Copy 'vertices' into the vertex buffer (GL_STATIC_DRAW = set once, used
     // by the GPU a few times)
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+                 GL_STATIC_DRAW);
     glVertexAttribPointer(
         // Which vertex attribute we want to configure, indicated by `layout
         // (location = x)` in the shader
@@ -74,7 +91,10 @@ int main() {
     // `vbo_id' as the vertex attribute's bound VBO so afterwards we can safely
     // unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_id);
     glBindVertexArray(0);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
@@ -84,7 +104,7 @@ int main() {
 
         glUseProgram(shader_program_id);
         glBindVertexArray(vao_id);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -111,7 +131,7 @@ GLFWwindow *init_window() {
 #endif
 
     GLFWwindow *window =
-        glfwCreateWindow(800, 600, "OpenGL Template", NULL, NULL);
+        glfwCreateWindow(600, 600, "OpenGL Template", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -125,7 +145,7 @@ GLFWwindow *init_window() {
         std::exit(-1);
     }
 
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, 600, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     return window;
